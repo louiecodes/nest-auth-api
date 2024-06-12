@@ -24,5 +24,7 @@ model User {
   firstName String?
   lastName  String?
 
+  refreshToken String?
+
   @@map("users")
 }
