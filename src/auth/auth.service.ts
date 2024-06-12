@@ -60,6 +60,21 @@ export class AuthService {
     }
   }
 
+  async logout(userId: number): Promise<boolean> {
+    await this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        refreshToken: {
+          not: null,
+        },
+      },
+      data: {
+        refreshToken: null,
+      },
+    });
+    return true;
+  }
+
   async signToken(
     userId: number,
     email: string,
