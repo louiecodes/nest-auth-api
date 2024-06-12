@@ -71,3 +71,60 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+---
+
+## Custom Commands
+
+Remove Docker containers. Create and start containers. And Prisma applies all pending migrations, and creates the database if it does not exist.
+`db:dev:restart`
+
+## NestJS Commands
+
+Run project:
+```
+nest start
+```
+
+Run project in development mode:
+```
+nest start --watch
+```
+
+Run project in debug mode:
+```
+nest start --debug --watch
+```
+o
+```
+npm run start:dev
+```
+
+## Docker Commands
+
+Run Docker:
+```
+docker compose up dev-db -d
+```
+
+Check Docker status:
+```
+docker ps
+```
+
+## Prisma Commands
+
+Browse your data:
+```
+npx prisma studio
+```
+
+Create migrations from your Prisma schema, apply them to the database, generate artifacts (e.g. Prisma Client):
+```
+npx prisma migrate dev
+```
+
+Seed the database with file located at ./prisma/seed.ts:
+```
+npx prisma db seed
+```
