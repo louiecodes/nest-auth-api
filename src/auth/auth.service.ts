@@ -113,6 +113,8 @@ export class AuthService {
   async getTokens(userId: number, email: string): Promise<Tokens> {
     const secretAccessToken = this.config.get('JWT_SECRET_ACCESS_TOKEN');
     const secretRefreshToken = this.config.get('JWT_SECRET_REFRESH_TOKEN');
+    const atExpiresIn = this.config.get('JWT_AT_EXPIRES_IN');
+    const rtExpiresIn = this.config.get('JWT_RT_EXPIRES_IN');
 
     const jwtPayload: JwtPayload = {
       id: userId,
@@ -122,11 +124,11 @@ export class AuthService {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
         secret: secretAccessToken,
-        expiresIn: '15m',
+        expiresIn: atExpiresIn,
       }),
       this.jwtService.signAsync(jwtPayload, {
         secret: secretRefreshToken,
-        expiresIn: '7d',
+        expiresIn: rtExpiresIn,
       }),
     ]);
 
