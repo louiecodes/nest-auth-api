@@ -23,7 +23,6 @@ export class AuthController {
   @Public()
   @Post('signup')
   signup(@Body() dto: AuthDto): Promise<Tokens> {
-    console.log({ dto });
     return this.authService.signup(dto);
   }
 
