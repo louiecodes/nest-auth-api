@@ -1,8 +1,8 @@
 {
   "name": "nest-api-auth",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "NestJS Authentication Service",
+  "author": "Luis Montero <lh.montero94@gmail.com>",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
