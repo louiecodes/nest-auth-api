@@ -3,6 +3,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -13,9 +14,10 @@ import {
 } from 'src/commons/decorators';
 import { RefreshTokenGuard } from 'src/commons/guards';
 import { AuthService } from './auth.service';
-import { AuthDto } from './dto';
+import { AuthDto, ChangePasswordDto } from './dto';
 import { Tokens } from './types';
 import { ApiTags } from '@nestjs/swagger';
+import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -50,5 +52,17 @@ export class AuthController {
     @GetCurrentUser('refreshToken') refreshToken: string,
   ): Promise<Tokens> {
     return this.authService.refreshTokens(userId, refreshToken);
+  }
+
+  @Patch('change-password')
+  async changePassword(
+    @GetCurrentUserId() userId: number,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<UpdateUserDto> {
+    return await this.authService.changePassword(
+      userId,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword,
+    );
   }
 }
