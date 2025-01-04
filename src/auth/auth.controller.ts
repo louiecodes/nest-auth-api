@@ -14,7 +14,7 @@ import {
 } from 'src/commons/decorators';
 import { RefreshTokenGuard } from 'src/commons/guards';
 import { AuthService } from './auth.service';
-import { AuthDto, ChangePasswordDto } from './dto';
+import { AuthDto, ChangePasswordDto, ForgotPasswordDto } from './dto';
 import { Tokens } from './types';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
@@ -64,5 +64,12 @@ export class AuthController {
       changePasswordDto.currentPassword,
       changePasswordDto.newPassword,
     );
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return await this.authService.forgotPassword(forgotPasswordDto.email);
   }
 }
