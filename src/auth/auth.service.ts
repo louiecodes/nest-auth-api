@@ -222,4 +222,36 @@ export class AuthService {
     const resetUrl = `${this.config.get('FRONTEND_URL')}/reset-password/${token}`;
     await this.mailService.sendResetPasswordEmail(email, resetUrl, username);
   }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      // Verificar el token
+      const payload = this.jwtService.verify(token, {
+        secret: this.config.get('JWT_RESET_PASSWORD_SECRET'),
+      });
+
+      // Buscar al usuario asociado al token
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.userId },
+      });
+
+      if (!user || user.resetPasswordToken !== token) {
+        throw new BadRequestException('Invalid or expired token');
+      }
+
+      // Hashear la nueva contraseña
+      const hashedPassword = await argon.hash(newPassword);
+
+      // Actualizar la contraseña en la base de datos
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetPasswordToken: null, // Limpia el token después de usarlo
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired token');
+    }
+  }
 }
