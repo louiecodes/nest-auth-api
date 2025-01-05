@@ -24,9 +24,11 @@ model User {
   firstName String?
   lastName  String?
 
-  refreshToken String?
-  Role         Role?   @relation(fields: [roleId], references: [id])
-  roleId       Int?
+  refreshToken       String?
+  resetPasswordToken String?
+
+  Role   Role? @relation(fields: [roleId], references: [id])
+  roleId Int?
 
   @@map("users")
 }

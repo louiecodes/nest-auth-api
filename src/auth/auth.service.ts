@@ -12,6 +12,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import { JwtPayload, Tokens } from './types';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     private config: ConfigService,
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async signin(dto: AuthDto): Promise<Tokens> {
@@ -182,6 +184,74 @@ export class AuthService {
       return updatedUser;
     } catch (error) {
       throw new BadRequestException();
+    }
+  }
+
+  async forgotPassword(email: string) {
+    // Buscar al usuario por su email
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (user) {
+      // Generar un token único
+      const resetToken = this.jwtService.sign(
+        { userId: user.id },
+        {
+          secret: this.config.get('JWT_RESET_PASSWORD_SECRET'),
+          expiresIn: '1h', // Expira en 1 hora
+        },
+      );
+      // Guardar el token en la base de datos
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { resetPasswordToken: resetToken },
+      });
+      // Enviar correo electrónico al usuario con el token (reemplaza con tu servicio de email)
+      await this.sendResetPasswordEmail(user.email, resetToken, user.firstName);
+    }
+
+    return { message: 'Email sent' };
+  }
+
+  private async sendResetPasswordEmail(
+    email: string,
+    token: string,
+    username: string,
+  ): Promise<void> {
+    const resetUrl = `${this.config.get('FRONTEND_URL')}/reset-password/${token}`;
+    await this.mailService.sendResetPasswordEmail(email, resetUrl, username);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    try {
+      // Verificar el token
+      const payload = this.jwtService.verify(token, {
+        secret: this.config.get('JWT_RESET_PASSWORD_SECRET'),
+      });
+
+      // Buscar al usuario asociado al token
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.userId },
+      });
+
+      if (!user || user.resetPasswordToken !== token) {
+        throw new BadRequestException('Invalid or expired token');
+      }
+
+      // Hashear la nueva contraseña
+      const hashedPassword = await argon.hash(newPassword);
+
+      // Actualizar la contraseña en la base de datos
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          resetPasswordToken: null, // Limpia el token después de usarlo
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException('Invalid or expired token');
     }
   }
 }
