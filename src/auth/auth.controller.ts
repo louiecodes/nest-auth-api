@@ -14,10 +14,11 @@ import {
 } from 'src/commons/decorators';
 import { RefreshTokenGuard } from 'src/commons/guards';
 import { AuthService } from './auth.service';
-import { AuthDto, ChangePasswordDto } from './dto';
+import { AuthDto, ChangePasswordDto, ForgotPasswordDto } from './dto';
 import { Tokens } from './types';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -63,6 +64,25 @@ export class AuthController {
       userId,
       changePasswordDto.currentPassword,
       changePasswordDto.newPassword,
+    );
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return await this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<void> {
+    return await this.authService.resetPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.newPassword,
     );
   }
 }
