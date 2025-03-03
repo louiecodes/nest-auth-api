@@ -110,7 +110,7 @@ export class MailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Webinfo</h1>
+            <h1>App</h1>
             <h1>Restablecimiento de contraseña</h1>
           </div>
           <div class="content">
@@ -120,7 +120,7 @@ export class MailService {
             <div class="button">
               <a href="${resetUrl}" target="_blank">Restablecer contraseña</a>
             </div>
-            <p>Gracias,<br>El equipo de Webinfo</p>
+            <p>Gracias,<br>El equipo de App</p>
           </div>
           <div class="footer">
             <p>Si tienes problemas para hacer clic en el botón, copia y pega el siguiente enlace en tu navegador:</p>
