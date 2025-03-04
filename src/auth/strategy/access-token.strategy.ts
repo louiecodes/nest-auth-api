@@ -23,7 +23,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
         id: payload.id,
       },
       include: {
-        Role: {
+        role: {
           select: {
             name: true,
           },

@@ -38,7 +38,7 @@ async function main() {
       password: await argon.hash('123456'),
       firstName: 'Louie',
       lastName: 'Codes',
-      Role: {
+      role: {
         connect: {
           id: 1, // SuperAdmin
         },
