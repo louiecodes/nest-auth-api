@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto';
+import { AuthDto, SignupDto } from './dto';
 import { JwtPayload, Tokens } from './types';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { MailService } from 'src/mail/mail.service';
@@ -50,11 +50,13 @@ export class AuthService {
     }
   }
 
-  async signup(dto: AuthDto) {
+  async signup(dto: SignupDto) {
     try {
       const hash = await argon.hash(dto.password);
       const user = await this.prisma.user.create({
         data: {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
           email: dto.email,
           password: hash,
         },

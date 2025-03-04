@@ -14,7 +14,12 @@ import {
 } from 'src/commons/decorators';
 import { RefreshTokenGuard } from 'src/commons/guards';
 import { AuthService } from './auth.service';
-import { AuthDto, ChangePasswordDto, ForgotPasswordDto } from './dto';
+import {
+  AuthDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  SignupDto,
+} from './dto';
 import { Tokens } from './types';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
@@ -27,7 +32,7 @@ export class AuthController {
 
   @Public()
   @Post('signup')
-  signup(@Body() dto: AuthDto): Promise<Tokens> {
+  signup(@Body() dto: SignupDto): Promise<Tokens> {
     return this.authService.signup(dto);
   }
 
