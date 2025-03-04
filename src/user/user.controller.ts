@@ -1,10 +1,18 @@
-import { Controller, Get, ParseIntPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  ParseIntPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { GetCurrentUser } from 'src/commons/decorators';
+import { GetCurrentUser, Roles } from 'src/commons/decorators';
 import { UserService } from './user.service';
 import { PaginationResponse } from 'src/commons/types';
 import { UserResponse } from './dto/user-response.dto';
+import { RolesGuard } from 'src/commons/guards';
+import { Role } from 'src/enums';
 
 @ApiTags('Users')
 @Controller('users')
@@ -17,6 +25,8 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(RolesGuard)
+  @Roles(Role.SuperAdmin)
   findAll(
     @Query('search') search?: string,
     @Query('page', ParseIntPipe) page: number = 1,
