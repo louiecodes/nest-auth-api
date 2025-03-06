@@ -22,8 +22,8 @@ import {
 } from './dto';
 import { Tokens } from './types';
 import { ApiTags } from '@nestjs/swagger';
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UserResponseDto } from 'src/user/dto/user-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -64,7 +64,7 @@ export class AuthController {
   async changePassword(
     @GetCurrentUserId() userId: number,
     @Body() changePasswordDto: ChangePasswordDto,
-  ): Promise<UpdateUserDto> {
+  ): Promise<UserResponseDto> {
     return await this.authService.changePassword(
       userId,
       changePasswordDto.currentPassword,

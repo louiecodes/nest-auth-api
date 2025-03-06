@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -9,10 +10,11 @@ import {
   PaginationResponse,
 } from 'src/commons/types';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserResponse } from './dto/user-response.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -21,7 +23,7 @@ export class UserService {
   async findAll(
     search?: string,
     params?: Pagination,
-  ): Promise<PaginationResponse<UserResponse>> {
+  ): Promise<PaginationResponse<UserResponseDto>> {
     const { skip = 0, take = 10, orderBy, order } = params || {};
 
     try {
@@ -86,7 +88,7 @@ export class UserService {
     }
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     try {
       const hash = await argon.hash(createUserDto.password);
       const user = await this.prisma.user.create({
@@ -97,6 +99,15 @@ export class UserService {
           password: hash,
           roleId: createUserDto.role,
         },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
       return user;
     } catch (e) {
@@ -106,6 +117,52 @@ export class UserService {
         }
       }
       throw new InternalServerErrorException('Error creating user');
+    }
+  }
+
+  async update(
+    userId: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    try {
+      // Verificar si el email ya existe en otro usuario
+      if (updateUserDto.email) {
+        const existingUser = await this.prisma.user.findUnique({
+          where: { email: updateUserDto.email },
+        });
+
+        if (existingUser && existingUser.id !== userId) {
+          throw new BadRequestException('Email already in use');
+        }
+      }
+
+      // Si está cambiando la contraseña, la hasheamos
+      if (updateUserDto.password) {
+        const hash = await argon.hash(updateUserDto.password);
+        updateUserDto.password = hash;
+      }
+
+      const user = await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          ...updateUserDto,
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      return user;
+    } catch (e) {
+      console.log(e);
+      throw new BadRequestException('Error updating user');
     }
   }
 }

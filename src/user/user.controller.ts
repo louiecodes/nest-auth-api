@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -12,10 +14,11 @@ import { User } from '@prisma/client';
 import { GetCurrentUser, Roles } from 'src/commons/decorators';
 import { UserService } from './user.service';
 import { PaginationResponse } from 'src/commons/types';
-import { UserResponse } from './dto/user-response.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { RolesGuard } from 'src/commons/guards';
 import { Role } from 'src/enums';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -36,7 +39,7 @@ export class UserController {
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('orderBy') orderBy?: string,
     @Query('order') order?: 'asc' | 'desc',
-  ): Promise<PaginationResponse<UserResponse>> {
+  ): Promise<PaginationResponse<UserResponseDto>> {
     const skip = (page - 1) * limit;
     return this.userService.findAll(search, {
       skip,
@@ -49,7 +52,17 @@ export class UserController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(Role.SuperAdmin)
-  createUser(@Body() createUserDto: CreateUserDto) {
+  createUser(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     return this.userService.create(createUserDto);
+  }
+
+  @Patch(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.SuperAdmin)
+  updateUser(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(userId, updateUserDto);
   }
 }

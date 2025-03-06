@@ -11,8 +11,8 @@ import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto, SignupDto } from './dto';
 import { JwtPayload, Tokens } from './types';
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { MailService } from 'src/mail/mail.service';
+import { UserResponseDto } from 'src/user/dto/user-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -152,7 +152,7 @@ export class AuthService {
     userId: number,
     currentPassword: string,
     newPassword: string,
-  ): Promise<UpdateUserDto> {
+  ): Promise<UserResponseDto> {
     try {
       // Buscar al usuario por su ID
       const user = await this.prisma.user.findUnique({
@@ -180,6 +180,9 @@ export class AuthService {
       const updatedUser = await this.prisma.user.update({
         where: { id: userId },
         data: { password: hashedPassword },
+        include: {
+          role: true,
+        },
       });
       delete updatedUser.password;
       delete updatedUser.refreshToken;
