@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
   ParseIntPipe,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -13,6 +15,7 @@ import { PaginationResponse } from 'src/commons/types';
 import { UserResponse } from './dto/user-response.dto';
 import { RolesGuard } from 'src/commons/guards';
 import { Role } from 'src/enums';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -41,5 +44,12 @@ export class UserController {
       orderBy,
       order,
     });
+  }
+
+  @Post()
+  @UseGuards(RolesGuard)
+  @Roles(Role.SuperAdmin)
+  createUser(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
   }
 }

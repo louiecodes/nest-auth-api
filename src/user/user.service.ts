@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import {
   Pagination,
   PaginationMeta,
@@ -6,6 +10,9 @@ import {
 } from 'src/commons/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserResponse } from './dto/user-response.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import * as argon from 'argon2';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UserService {
@@ -76,6 +83,29 @@ export class UserService {
       };
     } catch (e) {
       throw new InternalServerErrorException('Error retrieving users');
+    }
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const hash = await argon.hash(createUserDto.password);
+      const user = await this.prisma.user.create({
+        data: {
+          firstName: createUserDto.firstName,
+          lastName: createUserDto.lastName,
+          email: createUserDto.email,
+          password: hash,
+          roleId: createUserDto.role,
+        },
+      });
+      return user;
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2002') {
+          throw new ForbiddenException('Credentials taken');
+        }
+      }
+      throw new InternalServerErrorException('Error creating user');
     }
   }
 }
