@@ -165,4 +165,29 @@ export class UserService {
       throw new BadRequestException('Error updating user');
     }
   }
+
+  async delete(userId: number) {
+    try {
+      const user = await this.prisma.user.findFirstOrThrow({
+        where: {
+          id: userId,
+        },
+      });
+
+      await this.prisma.user.delete({
+        where: {
+          id: userId,
+        },
+      });
+
+      return user;
+    } catch (e) {
+      if (e instanceof PrismaClientKnownRequestError) {
+        if (e.code === 'P2025') {
+          throw new ForbiddenException('User not found');
+        }
+      }
+      throw new BadRequestException('Error deleting user');
+    }
+  }
 }
