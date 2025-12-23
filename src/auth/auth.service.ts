@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import * as argon from 'argon2';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
@@ -25,7 +25,7 @@ export class AuthService {
 
   async signin(dto: AuthDto): Promise<Tokens> {
     try {
-      const user = await this.prisma.user.findFirstOrThrow({
+      const user = await this.prisma.user.findFirst({
         where: {
           email: dto.email,
         },

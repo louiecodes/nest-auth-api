@@ -1,8 +1,11 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import * as argon from 'argon2';
 import { Role } from '../src/enums/role.enum';
 
-const prisma = new PrismaClient();
+const adapter = new PrismaMariaDb(process.env.DATABASE_URL as string);
+const prisma = new PrismaClient({ adapter });
+
 async function main() {
   /* Roles */
   const roleSuperAdmin = await prisma.role.upsert({
